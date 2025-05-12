@@ -810,9 +810,9 @@ def delete_option(option_type, option_id):
         abort(500, description=f"Server error deleting option: {str(e)}")
 
 
-if __name__ == '__main__':
-    with app.app_context(): 
-        add_initial_data() 
+# if __name__ == '__main__':
+#     with app.app_context(): 
+#         add_initial_data() 
     # app.run(debug=True, host='0.0.0.0', port=5001)
 
 
