@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice/Quote Generator{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <img src="{{ url_for('static', filename='images/mgok.png') }}" alt="Company Logo" class="img-fluid" style="max-height: 100px;">
+</div>
+
+<form id="invoice-form">
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-4">
+            <label for="docType" class="form-label">Document Type</label>
+            <select class="form-select" id="docType" name="docType" required>
+                <option value="" selected disabled>-- Select Type --</option>
+                <option value="icnb">ICNB</option>
+                <option value="quote">Quote</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="icnbFields" style="display: none;">
+        <hr>
+        <h4 class="mb-3 text-center text-primary" id="detailsHeading">Invoice Cum Bil of Supply</h4>
+        <div class="row g-3 mb-3">
+
+            <div class="col-md-4">
+                <label for="reference" class="form-label">Reference</label>
+                <select class="form-select managed-dropdown" id="reference" name="referenceSelected" data-option-type="reference">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.reference_options %}<option value="{{ item.name }}">{{ item.name }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newReference" name="newReference" placeholder="Enter New Reference" style="display: none;">
+            </div>
+
+            <div class="col-md-4">
+                <label for="purpose" class="form-label">Purpose</label>
+                <select class="form-select managed-dropdown" id="purpose" name="purposeSelected" data-option-type="purpose">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.purpose_options %}<option value="{{ item.name }}">{{ item.name }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newPurpose" name="newPurpose" placeholder="Enter New Purpose" style="display: none;">
+            </div>
+
+            <div class="col-md-4">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select managed-dropdown" id="category" name="categorySelected" data-option-type="category">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.category_options %}<option value="{{ item.name }}">{{ item.name }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newCategory" name="newCategory" placeholder="Enter New Category" style="display: none;">
+            </div>
+
+            <div class="col-md-4">
+                <label for="monthYear" class="form-label">Billing Month & Year</label>
+                <input type="month" class="form-control" id="monthYear" name="monthYear">
+            </div>
+
+            <div class="col-md-4">
+                <label for="gstout" class="form-label">BilledTo</label>
+                <select class="form-select managed-dropdown" id="gstout" name="gstoutSelected" data-option-type="gstout">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.gstout_options %}<option value="{{ item.value }}">{{ item.value }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newGstout" name="newGstout" placeholder="Enter New GST Out" style="display: none;">
+            </div>
+            <div class="col-md-4">
+                <label for="gstin" class="form-label">GSTIN</label>
+                <select class="form-select managed-dropdown" id="gstin" name="gstinSelected" data-option-type="gstin">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.gstin_options %}<option value="{{ item.value }}">{{ item.value }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option> </select>
+                    <input type="text" class="form-control mt-1 add-new-input" id="newGstin" name="newGstin" placeholder="Enter New GSTIN" style="display: none;">
+            </div>
+        </div>
+        <hr>
+        <h5 class="mb-3 text-secondary">Add Line Item</h5>
+        <div class="row g-3 mb-3 align-items-end bg-light p-3 rounded border">
+            <div class="col-md-2">
+                <label for="costCategory" class="form-label">Cost Category</label>
+                <select class="form-select managed-dropdown" id="costCategory" data-option-type="costCategory">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.costCategory_options %}
+                        <option value="{{ item.name }}">{{ item.name }}</option>
+                    {% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newCostCategory" placeholder="Enter New Category" style="display: none;">
+            </div>
+            
+        
+            <div class="col-md-3">
+                <label for="itemDescription" class="form-label">Description</label>
+                <select class="form-select managed-dropdown" id="itemDescription" data-option-type="itemDescription"> <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.itemDescription_options %}<option value="{{ item.name }}">{{ item.name }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newItemDescription" placeholder="Enter New Desc." style="display: none;">
+            </div>
+
+            <div class="col-md-2">
+                <label for="itemSac" class="form-label">SAC</label>
+                <select class="form-select managed-dropdown" id="itemSac" data-option-type="itemSac">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.itemSac_options %}<option value="{{ item.code }}">{{ item.code }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newItemSac" placeholder="Enter New SAC" style="display: none;">
+            </div>
+
+            <div class="col-md-2">
+                <label for="itemRateValue" class="form-label">Rate</label>
+                <input type="number" class="form-control" id="itemRateValue" placeholder="Enter Rate">
+                <select class="form-select mt-1" id="itemRateUnit">
+                    <option value="hr">per hr</option>
+                    <option value="month">per month</option>
+                    <option value="minute">per minute</option>
+                    <option value="sec">per sec</option>
+                    <option value="year">per year</option>
+                    <option value="day">per day</option>
+                    <option value="week">per week</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="itemUnitsConsumedValue" class="form-label">Units</label>
+                <input type="number" class="form-control" id="itemUnitsConsumedValue" placeholder="Enter Units">
+                <select class="form-select mt-1" id="itemUnitsConsumedUnit">
+                    <option value="hr">hr</option>
+                    <option value="month">month</option>
+                    <option value="minute">minute</option>
+                    <option value="sec">sec</option>
+                    <option value="year">year</option>
+                    <option value="day">day</option>
+                    <option value="week">week</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-success w-100" id="addItemBtn"><i class="bi bi-plus-circle"></i> Add</button>
+            </div>
+        </div>
+
+        <h5 class="mt-4 mb-2 text-secondary">Added Items</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Cost Category</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">SAC</th>
+                        <th scope="col">Rate</th>
+                        <th scope="col">Units</th>
+                        <th scope="col">Total Amount</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="lineItemsTableBody">
+                    <tr id="no-items-row">
+                        <td colspan="8" class="text-center text-muted">No items added yet.</td>
+                    </tr>
+                </tbody>
+                <tfoot class="table-group-divider">
+                    <tr>
+                        <td colspan="6" class="text-end fw-bold">Subtotal:</td>
+                        <td id="subTotalAmount" class="fw-bold">0.00</td>
+                        <td></td>
+                    </tr>
+                    <tr id="discountRow" style="display: none;">
+                        <td colspan="6" class="text-end fw-bold">Discount (<input type="number" id="discountPercentage" name="discountPercentageInput" min="0" max="100" step="0.01" value="0" style="width: 60px;">%):</td>
+                        <td id="discountAmount" class="fw-bold text-danger">- 0.00</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" class="text-end fw-bold fs-5">Total Amount:</td>
+                        <td id="grandTotalAmount" class="fw-bold fs-5">0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <hr class="mt-4">
+        <h5 class="mb-3 text-secondary">Options</h5>
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="discountCheckbox" name="applyDiscount">
+                    <label class="form-check-label" for="discountCheckbox">Apply Discount?</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="advancePaymentCheckbox" name="advancePayment">
+                    <label class="form-check-label" for="advancePaymentCheckbox">Advance Payment Made?</label>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label for="reverseCharge" class="form-label">Reverse Charge</label>
+                <select class="form-select managed-dropdown" id="reverseCharge" name="reverseChargeSelected" data-option-type="reverseCharge">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.reverseCharge_options %}<option value="{{ item.value }}">{{ item.value }}</option>{% endfor %}
+                    <option value="Manage" class="manage-option">Manage...</option> </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="paymentMethod" class="form-label">Payment Method</label>
+                <select class="form-select managed-dropdown" id="paymentMethod" name="paymentMethodSelected" data-option-type="paymentMethod">
+                    <option value="" selected disabled>-- Select --</option>
+                    {% for item in data.paymentMethod_options %}<option value="{{ item.name }}">{{ item.name }}</option>{% endfor %}
+                    <option value="Add New" class="add-new-option">Add New</option>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newPaymentMethod" name="newPaymentMethod" placeholder="Enter New Payment Method" style="display: none;">
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn"><i class="bi bi-file-earmark-check"></i> Generate Document</button>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="manageOptionsModal" tabindex="-1" aria-labelledby="manageOptionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+         <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manageOptionsModalLabel">Manage Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Loading options...</p>
+                <ul class="list-group" id="manageOptionsList">
+                </ul>
+                <div id="manageOptionsError" class="text-danger mt-2" style="display: none;"></div>
+                <div id="manageOptionsMessage" class="text-success mt-2" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
