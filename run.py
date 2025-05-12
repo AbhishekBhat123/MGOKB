@@ -26,18 +26,25 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'a_very_insecure_default_secret_key_CHANGE_ME_NOW')
 
 # --- Database Configuration ---
-basedir = os.path.abspath(os.path.dirname(__file__))
+# basedir = os.path.abspath(os.path.dirname(__file__))
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'invoice_options.db')
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# db = SQLAlchemy(app)
+basedir = '/tmp'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'invoice_options.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # --- Create Output Directory ---
-output_dir = os.path.join(basedir, 'output')
+# output_dir = os.path.join(basedir, 'output')
+# if not os.path.exists(output_dir):
+#     os.makedirs(output_dir)
+output_dir = '/tmp/output'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-
-# --- Define the Excel Log File Path ---
 excel_log_file = os.path.join(output_dir, 'all_prints_log.xlsx')
+# --- Define the Excel Log File Path ---
+# excel_log_file = os.path.join(output_dir, 'all_prints_log.xlsx')
 
 # --- Define Headers for the Excel Log File ---
 EXCEL_LOG_HEADERS = [
@@ -809,3 +816,6 @@ def delete_option(option_type, option_id):
         print(f"Error deleting {option_type} ID {option_id}: {e}")
         abort(500, description=f"Server error deleting option: {str(e)}")
 
+with app.app_context():
+    db.create_all()
+    add_initial_data()
