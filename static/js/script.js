@@ -162,7 +162,7 @@ $(document).ready(function() {
 
         if (selectedType !== '') {
             if (selectedType === 'icnb') {
-                $detailsHeading.text('ICNB Details');
+                $detailsHeading.text('Incubation Cum Bill Of Supply Details');
             } else if (selectedType === 'quote') {
                 $detailsHeading.text('Quotation Details');
             }

@@ -21,7 +21,7 @@
 
     <div id="icnbFields" style="display: none;">
         <hr>
-        <h4 class="mb-3 text-center text-primary" id="detailsHeading">Invoice Cum Bil of Supply</h4>
+        <h4 class="mb-3 text-center text-primary" id="detailsHeading">Incubation Cum Bill of Supply</h4>
         <div class="row g-3 mb-3">
 
             <div class="col-md-4">
@@ -78,8 +78,9 @@
                     <option value="" selected disabled>-- Select --</option>
                     {% for item in data.gstin_options %}<option value="{{ item.value }}">{{ item.value }}</option>{% endfor %}
                     <option value="Add New" class="add-new-option">Add New</option>
-                    <option value="Manage" class="manage-option">Manage...</option> </select>
-                    <input type="text" class="form-control mt-1 add-new-input" id="newGstin" name="newGstin" placeholder="Enter New GSTIN" style="display: none;">
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
+                <input type="text" class="form-control mt-1 add-new-input" id="newGstin" name="newGstin" placeholder="Enter New GSTIN" style="display: none;">
             </div>
         </div>
         <hr>
@@ -97,11 +98,11 @@
                 </select>
                 <input type="text" class="form-control mt-1 add-new-input" id="newCostCategory" placeholder="Enter New Category" style="display: none;">
             </div>
-            
-        
+
             <div class="col-md-3">
                 <label for="itemDescription" class="form-label">Description</label>
-                <select class="form-select managed-dropdown" id="itemDescription" data-option-type="itemDescription"> <option value="" selected disabled>-- Select --</option>
+                <select class="form-select managed-dropdown" id="itemDescription" data-option-type="itemDescription">
+                    <option value="" selected disabled>-- Select --</option>
                     {% for item in data.itemDescription_options %}<option value="{{ item.name }}">{{ item.name }}</option>{% endfor %}
                     <option value="Add New" class="add-new-option">Add New</option>
                     <option value="Manage" class="manage-option">Manage...</option>
@@ -213,7 +214,8 @@
                 <select class="form-select managed-dropdown" id="reverseCharge" name="reverseChargeSelected" data-option-type="reverseCharge">
                     <option value="" selected disabled>-- Select --</option>
                     {% for item in data.reverseCharge_options %}<option value="{{ item.value }}">{{ item.value }}</option>{% endfor %}
-                    <option value="Manage" class="manage-option">Manage...</option> </select>
+                    <option value="Manage" class="manage-option">Manage...</option>
+                </select>
             </div>
 
             <div class="col-md-3">
@@ -230,13 +232,14 @@
 
         <div class="text-center mt-5">
             <button type="submit" class="btn btn-primary btn-lg" id="generateBtn"><i class="bi bi-file-earmark-check"></i> Generate Document</button>
+            <a href="{{ url_for('download_invoice_log') }}" class="btn btn-success btn-lg"><i class="bi bi-download"></i> Download Excel</a>
         </div>
     </div>
 </form>
 
 <div class="modal fade" id="manageOptionsModal" tabindex="-1" aria-labelledby="manageOptionsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
-         <div class="modal-content">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="manageOptionsModalLabel">Manage Options</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
