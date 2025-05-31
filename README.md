@@ -6,9 +6,15 @@
 #         add_initial_data() 
     # app.run(debug=True, host='0.0.0.0', port=5001)
 
+# and just run this
+$env:FLASK_APP = "app.py"
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
 
-
-
+for future
+flask db migrate -m "Add new column"
+flask db upgrade
 
 {% extends "base.html" %}
 
