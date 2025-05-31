@@ -703,6 +703,6 @@ def delete_option(option_type, option_id):
         print(f"Error deleting {option_type} ID {option_id}: {e}")
         abort(500, description=f"Server error deleting option: {str(e)}")
 
-with app.app_context():
-    db.create_all()
-    add_initial_data()
+# with app.app_context():
+#     db.create_all()
+#     add_initial_data()
