@@ -1,0 +1,1114 @@
+{% extends "base.html" %}
+
+{% block title %}Document Preview{% endblock %}
+{% block head_extra %}
+    {{ super() }}
+    <head>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 10px;
+            font-size: 10px;
+            color: #1a202c;
+            background-color: #f7fafc;
+            line-height: 1.4;
+        }
+        .container {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            padding: 0;
+        }
+        .container .container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 16px;
+            border: none;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            border-radius: 6px;
+        }
+        .no-print {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .no-print .btn {
+            padding: 6px 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2b6cb0, #2c5282);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            font-size: 10px;
+        }
+        .no-print .btn i {
+            margin-right: 4px;
+        }
+        .no-print .btn:hover {
+            background: linear-gradient(135deg, #2c5282, #2b6cb0);
+            transform: translateY(-1px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .no-print .btn:active,
+        .no-print .btn:focus {
+            transform: translateY(0);
+            box-shadow: none;
+            outline: none;
+        }
+        .no-print .btn:disabled {
+            background: #e2e8f0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .no-print .small {
+            font-size: 8px;
+        }
+        .header {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #2b6cb0;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .print-only-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 9px;
+            color: #1a202c;
+            line-height: 1.3;
+        }
+        .print-only-header p {
+            margin: 2px 0;
+        }
+        .print-only-header .bold {
+            font-weight: 700;
+        }
+        .header-table, .info-table, .cost-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 1px;
+            margin-bottom: 16px;
+            font-size: 10px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+        .header-table td, .info-table td, .cost-table th, .cost-table td {
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+            vertical-align: middle;
+        }
+        .header-table td:first-child, .info-table td:first-child {
+            background-color: #edf2f7;
+            font-weight: 600;
+            width: 25%;
+            color: #4a5568;
+        }
+        .cost-table th {
+            background-color: #2b6cb0;
+            color: white;
+            font-weight: 600;
+            padding: 8px;
+            text-align: center;
+        }
+        .cost-table td {
+            background-color: #ffffff;
+            transition: background-color 0.2s ease;
+        }
+        .cost-table tr:nth-child(even) td {
+            background-color: #f7fafc;
+        }
+        .cost-table tr:hover td {
+            background-color: #edf2f7;
+        }
+        .cost-table td:nth-child(1), .cost-table td:nth-child(4), .cost-table td:nth-child(5), .cost-table td:nth-child(6) {
+            text-align: right;
+        }
+        .cost-table td:nth-child(2) {
+            text-align: left;
+        }
+        .cost-table td:nth-child(3) {
+            text-align: center;
+        }
+        .total-row td {
+            font-weight: 600;
+            background-color: #e6f0fa !important;
+        }
+        .terms, .payment, .bank-details {
+            margin-bottom: 4px;
+            font-size: 9px;
+        }
+        .terms p, .payment p, .bank-details p {
+            margin: 4px 0;
+            color: #4a5568;
+        }
+        .payment p, .bank-details p {
+            font-weight: 600;
+        }
+        .qr-code {
+            width: 80px;
+            height: 80px;
+            background-color: #f7fafc;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #4a5568;
+            text-align: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .qr-code img {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+        }
+        .signature-block {
+            display: flex;
+            align-items: flex-end;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 4px;
+            margin-top: 0;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 80px;
+        }
+        .signature-details {
+            flex-grow: 1;
+            flex-basis: 0;
+            margin-bottom: 0;
+            color: #4a5568;
+        }
+        .authorised-signatory {
+            text-align: right;
+            flex-grow: 1;
+            flex-basis: 0;
+            font-weight: 600;
+            color: #2b6cb0;
+        }
+        .authorised-signatory p {
+            margin: 0;
+        }
+        #editInvoiceNumberInput {
+            display: none;
+            width: 200px;
+            padding: 3px 6px;
+            font-size: 10px;
+            margin-left: 6px;
+            vertical-align: middle;
+            border-radius: 3px;
+            border: 1px solid #e2e8f0;
+        }
+        #editDateInput {
+            display: none;
+            width: 100px;
+            padding: 3px 6px;
+            font-size: 10px;
+            margin-left: 6px;
+            vertical-align: middle;
+            border-radius: 3px;
+            border: 1px solid #e2e8f0;
+        }
+        #editInvoiceNumberIcon, #editDateIcon {
+            cursor: pointer;
+            margin-left: 6px;
+            vertical-align: middle;
+            font-size: 12px;
+        }
+        #number-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+        .bi-pencil-fill {
+            color: #718096;
+        }
+        .bi-check-circle-fill {
+            color: #38a169;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+                print-color-adjust: exact;
+                font-size: 8pt;
+            }
+            .container {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+            }
+            .container .container {
+                width: 190mm;
+                min-height: 277mm;
+                margin: 3mm auto;
+                padding: 3mm;
+                box-sizing: border-box;
+                border: none;
+                box-shadow: none;
+                background-color: #fff;
+            }
+            .print-only-header {
+                display: block;
+                text-align: center;
+                margin-bottom: 8pt;
+                font-size: 8pt;
+                line-height: 1.2;
+            }
+            .print-only-header p {
+                margin: 1pt 0;
+            }
+            .print-only-header .bold {
+                font-weight: 700;
+            }
+            .header-table, .info-table, .cost-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0 0.5pt;
+            }
+            .header-table td, .info-table td, .cost-table th, .cost-table td {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+                padding: 6pt;
+                border: 1px solid #e2e8f0;
+                font-size: 8pt;
+            }
+            .info-table td[style*="white-space: pre-wrap"] {
+                white-space: normal;
+                max-width: 0;
+            }
+            .cost-table th {
+                background-color: #2b6cb0;
+                color: white;
+                font-weight: 600;
+            }
+            .cost-table td {
+                background-color: #ffffff;
+            }
+            .cost-table tr:nth-child(even) td {
+                background-color: #f7fafc;
+            }
+            .cost-table td:nth-child(1), .cost-table td:nth-child(4), .cost-table td:nth-child(5), .cost-table td:nth-child(6) {
+                text-align: right;
+            }
+            .cost-table td:nth-child(2) {
+                text-align: left;
+                max-width: 0;
+            }
+            .cost-table td:nth-child(3) {
+                text-align: center;
+            }
+            .total-row td {
+                background-color: #e6f0fa !important;
+                font-weight: 600;
+            }
+            .header, .print-only-header, .header-table, .info-table, .cost-table, .terms, .payment, .bank-details, .signature-block {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .header-table td:first-child, .info-table td:first-child {
+                background-color: #edf2f7;
+            }
+            .qr-code {
+                border: 1px solid #2b6cb0;
+                width: 50px;
+                height: 50px;
+            }
+            @page {
+                size: A4;
+                margin: 3mm;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="no-print">
+        <a href="{{ url_for('edit_from_preview') }}" class="btn btn-warning btn-sm">
+            <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger" id="deleteBtn"><i class="bi bi-trash"></i> Delete</button>
+        <button id="printAndLogBtn" onclick="printAndLogDocument()" class="btn btn-info btn-sm" disabled>
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            <i class="bi bi-printer"></i> Print & Log
+        </button>
+        <a href="{{ url_for('download_invoice_log') }}" class="btn btn-success btn-lg"><i class="bi bi-download"></i> Download Excel</a>
+        <span id="print-log-status" class="ms-2 text-muted small">Loading sequence info...</span>
+    </div>
+
+    <div class="print-only-header">
+        <p class="bold">Manipal Government of Karnataka Bioincubator - BioNEST</p>
+        <p>MUTBI Society, 1st 3rd Floor, Advanced Research Centre, MAHE, Manipal 576104</p>
+        <p>GSTIN: 29AABAM5826A1ZT</p>
+    </div>
+
+    <div class="header">
+        <h1 id="card-header-title">Document Preview</h1>
+    </div>
+
+    <table class="header-table">
+        <tr>
+            <td><span id="number-label">Loading...</span></td>
+            <td>
+                <span id="preview-invoiceNumber">Loading...</span>
+                <input type="text" id="editInvoiceNumberInput" class="form-control form-control-sm" placeholder="Enter invoice number (e.g., MGKBIN-BioNEST/2025-26/4661/50)">
+                <i id="editInvoiceNumberIcon" class="bi bi-pencil-fill text-muted" title="Edit invoice number"></i>
+            </td>
+        </tr>
+        <tr>
+            <td>Date</td>
+            <td>
+                <span id="preview-documentDate">Loading...</span>
+                <input type="text" id="editDateInput" class="form-control form-control-sm" placeholder="YYYY-MM-DD">
+                <i id="editDateIcon" class="bi bi-pencil-fill text-muted" title="Edit date"></i>
+            </td>
+        </tr>
+        <tr>
+            <td>Reference</td>
+            <td>{{ preview_data.get('reference', 'N/A') }}</td>
+        </tr>
+    </table>
+
+    <table class="info-table">
+        <tr>
+            <td>Purpose</td>
+            <td>{{ preview_data.get('purpose', 'N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Category</td>
+            <td>{{ preview_data.get('category', 'N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Billing Month/Year</td>
+            <td>{{ preview_data.get('monthYear', 'N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Billed to</td>
+            <td style="white-space: pre-wrap;">{{ preview_data.get('gstout', 'N/A') }}</td>
+        </tr>
+        <tr>
+            <td>GSTIN</td>
+            <td>{{ preview_data.get('gstin', 'N/A') }}</td>
+        </tr>
+        <tr>
+            <td>Financial Year</td>
+            <td id="financial-year">Loading...</td>
+        </tr>
+    </table>
+
+    <table class="cost-table">
+        <thead>
+            <tr>
+                <th>SN</th>
+                <th>Description</th>
+                <th>SAC</th>
+                <th>Rate</th>
+                <th>Units</th>
+                <th>Total (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if preview_data.get('lineItems') %}
+                {% for item in preview_data.get('lineItems') %}
+                <tr>
+                    <td>{{ item.slNo }}</td>
+                    <td>
+                        {{ item.costCategory }}
+                        {% if item.description and item.description != item.costCategory %}
+                            - {{ item.description }}
+                        {% endif %}
+                        {% if 'monitor' in item.costCategory|lower or 'monitor' in item.description|lower %}
+                            ({{ preview_data.get('monthYear', 'N/A') }})
+                        {% endif %}
+                    </td>
+                    <td>{{ item.sac }}</td>
+                    <td>{{ "%.2f"|format(item.rateValue | float) }}/{{ item.rateUnit }}</td>
+                    <td>{{ item.unitsConsumedValue }} {{ item.unitsConsumedUnit }}</td>
+                    <td>₹{{ "%.2f"|format(item.total | float) }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No line items found.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="5" style="text-align: right;">Subtotal (₹)</td>
+                <td>₹{{ "%.2f"|format(preview_data.get('subTotal', 0.0) | float) }}</td>
+            </tr>
+            {% if preview_data.get('applyDiscount') and preview_data.get('discountAmount', 0.0) > 0 %}
+            <tr class="total-row">
+                <td colspan="5" style="text-align: right;">Discount ({{ preview_data.get('discountPercentage', 0) }}%)</td>
+                <td>-₹{{ "%.2f"|format(preview_data.get('discountAmount', 0.0) | float) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="5" style="text-align: right;">Grand Total (₹)</td>
+                <td>₹{{ "%.2f"|format(preview_data.get('grandTotal', 0.0) | float) }}</td>
+            </tr>
+            {% endif %}
+        </tfoot>
+    </table>
+
+    <div class="terms">
+        <p>Payment Terms: Within 14 days from invoice date</p>
+    </div>
+
+    <div class="payment">
+        <p>Reverse Charge: {{ 'YES' if preview_data.get('reverseCharge') else 'NO' }}</p>
+        <p>Payment Method: {{ preview_data.get('paymentMethod', 'N/A') }}</p>
+        <p>Advance Payment: {{ 'Yes' if preview_data.get('advancePayment') else 'No' }}</p>
+    </div>
+    <br>
+    <div class="bank-details" >
+        <p>Account: MUTBI SOCIETY A/C BIRAC BioNEST</p>
+        <p>A/c No: 398559966615</p>
+        <p>Bank: State Bank of India, Manipal</p>
+        <p>IFSC: SBIN0004426</p>
+    </div>
+
+    <div class="signature-block">
+        <div class="qr-code">
+            <img src="static/images/qr.jpg" height="100" width="100" alt="QR Code">
+        </div>
+        <div class="signature-details">
+            <p>Manipal GOK Bioincubator - BioNEST</p>
+        </div>
+        <div class="authorised-signatory">
+            <p>Authorised Signatory</p>
+        </div>
+    </div>
+</div>
+
+<script id="preview-data" type="application/json">
+{{ preview_data | tojson }}
+</script>
+<script>
+    const previewDataElement = document.getElementById('preview-data');
+    let previewDataForJS = {};
+    const printButton = document.getElementById('printAndLogBtn');
+    const printButtonSpinner = printButton ? printButton.querySelector('.spinner-border') : null;
+    const statusArea = document.getElementById('print-log-status');
+    const invoiceNumberSpan = document.getElementById('preview-invoiceNumber');
+    const dateSpanElement = document.getElementById('preview-documentDate');
+    const numberLabelSpan = document.getElementById('number-label');
+    const cardHeaderTitle = document.getElementById('card-header-title');
+    const financialYearElement = document.getElementById('financial-year');
+    const editInvoiceNumberIcon = document.getElementById('editInvoiceNumberIcon');
+    const editInvoiceNumberInput = document.getElementById('editInvoiceNumberInput');
+    const editDateIcon = document.getElementById('editDateIcon');
+    const editDateInput = document.getElementById('editDateInput');
+    let manualInvoiceNumberPart = null;
+    let manualDate = null;
+    let sequenceInfo = null;
+
+    if (previewDataElement && previewDataElement.textContent) {
+        try {
+            previewDataForJS = JSON.parse(previewDataElement.textContent);
+            console.log("Parsed previewDataForJS from session:", previewDataForJS);
+        } catch (e) {
+            console.error("Error parsing preview data JSON:", e);
+            if (printButton) printButton.disabled = true;
+            if (statusArea) statusArea.textContent = 'Error loading document data.';
+        }
+    } else {
+        console.warn("Preview data element not found or is empty.");
+        if (printButton) printButton.disabled = true;
+        if (statusArea) statusArea.textContent = 'Document data missing from session.';
+    }
+
+    function updatePreviewDisplay(invoiceNumber, currentDate, financialYearToDisplay = null) {
+        console.log("Updating preview display with:", { invoiceNumber, currentDate, financialYearToDisplay });
+        if (invoiceNumberSpan) {
+            invoiceNumberSpan.textContent = invoiceNumber;
+            invoiceNumberSpan.classList.remove('d-none');
+            if (editInvoiceNumberInput) {
+                editInvoiceNumberInput.classList.add('d-none');
+                editInvoiceNumberInput.value = '';
+            }
+            if (editInvoiceNumberIcon) {
+                editInvoiceNumberIcon.classList.remove('bi-check-circle-fill', 'text-success');
+                editInvoiceNumberIcon.classList.add('bi-pencil-fill');
+                editInvoiceNumberIcon.title = "Edit invoice number";
+            }
+        }
+        if (dateSpanElement) {
+            dateSpanElement.textContent = currentDate;
+            dateSpanElement.classList.remove('d-none');
+            if (editDateInput) {
+                editDateInput.classList.add('d-none');
+                editDateInput.value = '';
+            }
+            if (editDateIcon) {
+                editDateIcon.classList.remove('bi-check-circle-fill', 'text-success');
+                editDateIcon.classList.add('bi-pencil-fill');
+                editDateIcon.title = "Edit date";
+            }
+        }
+        if (numberLabelSpan && previewDataForJS.docType) {
+            numberLabelSpan.textContent = previewDataForJS.docType.toUpperCase() === 'ICNB' ? 'Invoice Number' : 'Quotation Number';
+        } else if (numberLabelSpan) {
+            numberLabelSpan.textContent = 'Quotation Number';
+        }
+        if (cardHeaderTitle && previewDataForJS.docType) {
+            const docType = previewDataForJS.docType.toUpperCase();
+            if (docType === 'ICNB') {
+                cardHeaderTitle.textContent = 'Invoice Cum Bill of Supply';
+            } else if (docType === 'QUOTE') {
+                cardHeaderTitle.textContent = 'Quotation';
+            } else {
+                cardHeaderTitle.textContent = docType;
+            }
+        } else if (cardHeaderTitle) {
+            cardHeaderTitle.textContent = 'Document';
+        }
+        if (financialYearElement) {
+            financialYearElement.textContent = financialYearToDisplay || previewDataForJS.financialYear || 'N/A';
+        }
+    }
+
+    function updateStatus(message) {
+        console.log("Status:", message);
+        if (statusArea) {
+            statusArea.textContent = message;
+        }
+    }
+
+    function parseInvoiceNumber(invoiceNumber) {
+        if (!invoiceNumber || typeof invoiceNumber !== 'string') return null;
+        const regex = /^(.+)\/(\d{4}-\d{2})\/(.+)\/(\d+)$/;
+        const match = invoiceNumber.match(regex);
+        if (match) {
+            return {
+                prefix: match[1],
+                financialYear: match[2],
+                code: match[3],
+                numericPart: parseInt(match[4], 10)
+            };
+        }
+        return null;
+    }
+
+    function formatInvoiceNumber(prefix, financialYear, code, numericPart) {
+        const paddedNumber = String(numericPart).padStart(4, '0');
+        return `${prefix}/${financialYear}/${code}/${paddedNumber}`;
+    }
+
+    function validateDate(dateStr) {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateStr)) return false;
+        const date = new Date(dateStr);
+        return date instanceof Date && !isNaN(date);
+    }
+
+    async function setupInvoiceSequence(docType) {
+        updateStatus(`Awaiting setup input for ${docType.toUpperCase()}...`);
+        const defaultPrefix = sequenceInfo?.fixedPrefix || (docType.toUpperCase() === 'ICNB' ? 'MGKBIN-BioNEST' : 'MGKBIN-QUOTE');
+        const defaultYear = sequenceInfo?.financialYear || '2025-26';
+        const defaultCode = sequenceInfo?.fixedCode || (docType.toUpperCase() === 'ICNB' ? '4661' : 'QT');
+        const defaultStartingNumber = sequenceInfo?.nextNumberPrediction || '1';
+
+        const fixedPrefix = prompt(`Enter the fixed prefix part for ${docType.toUpperCase()} (e.g., '${defaultPrefix}'):`, defaultPrefix);
+        if (fixedPrefix === null) {
+            updateStatus('Setup cancelled by user.');
+            throw new Error("Invoice sequence setup cancelled.");
+        }
+
+        const financialYear = prompt(`Enter the financial year for ${docType.toUpperCase()} (e.g., '2025-26'):`, defaultYear);
+        if (financialYear === null) {
+            updateStatus('Setup cancelled by user.');
+            throw new Error("Invoice sequence setup cancelled.");
+        }
+
+        const fixedCode = prompt(`Enter the fixed code part for ${docType.toUpperCase()} (e.g., '${defaultCode}'):`, defaultCode);
+        if (fixedCode === null) {
+            updateStatus('Setup cancelled by user.');
+            throw new Error("Invoice sequence setup cancelled.");
+        }
+
+        const startingNumberStr = prompt(`Enter the starting number for ${docType.toUpperCase()} (e.g., '1' or '50'):`, defaultStartingNumber);
+        if (startingNumberStr === null) {
+            updateStatus('Setup cancelled by user.');
+            throw new Error("Invoice sequence setup cancelled.");
+        }
+
+        const startingNumber = parseInt(startingNumberStr, 10);
+        if (isNaN(startingNumber) || startingNumber <= 0) {
+            alert("Invalid starting number. Please enter a valid positive integer.");
+            updateStatus('Setup failed: Invalid number input.');
+            throw new Error("Invalid starting number provided.");
+        }
+
+        updateStatus(`Saving setup for ${docType.toUpperCase()}...`);
+        try {
+            const response = await fetch("{{ url_for('setup_invoice_sequence') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    docType: docType.toUpperCase(),
+                    fixedPrefix: fixedPrefix.trim(),
+                    financialYear: financialYear.trim(),
+                    fixedCode: fixedCode.trim(),
+                    startingNumber
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                const errorMessage = data.message || `HTTP error! Status: ${response.status}`;
+                if (response.status === 409) {
+                    alert(`Sequence for ${docType.toUpperCase()} may already exist for this year or there was a conflict. Reloading to retry assignment.`);
+                    window.location.reload();
+                    throw new Error("Sequence setup conflict, reloading.");
+                }
+                throw new Error(errorMessage);
+            }
+
+            updateStatus(`Setup saved successfully for ${docType.toUpperCase()}. Refetching sequence info...`);
+            await fetchSequenceInfo(false);
+        } catch (error) {
+            console.error(`Error during sequence setup for ${docType.toUpperCase()}:`, error);
+            updateStatus(`Setup error: ${error.message}`);
+            if (printButton) {
+                printButton.disabled = true;
+                printButton.innerHTML = '<i class="bi bi-x-circle"></i> Cannot Print';
+                if (printButtonSpinner) printButtonSpinner.classList.add('d-none');
+            }
+            alert(`Failed to set up invoice sequence for ${docType.toUpperCase()}: ${error.message}\nPrinting will be disabled.`);
+            if (editInvoiceNumberIcon) editInvoiceNumberIcon.style.display = 'none';
+            if (editDateIcon) editDateIcon.style.display = 'none';
+            throw error;
+        }
+    }
+
+    async function fetchSequenceInfo(isRevisitOfLoggedDoc = false) {
+        const docType = previewDataForJS.docType?.toUpperCase() || 'QUOTE';
+        console.log(`Fetching sequence info for ${docType}. Is revisit of logged doc: ${isRevisitOfLoggedDoc}`);
+        updateStatus(`Fetching sequence info for ${docType}...`);
+        if (printButton) printButton.disabled = true;
+        if (printButtonSpinner) printButtonSpinner.classList.remove('d-none');
+        if (editInvoiceNumberIcon) editInvoiceNumberIcon.style.display = 'none';
+        if (editDateIcon) editDateIcon.style.display = 'none';
+
+        try {
+            const response = await fetch("{{ url_for('get_invoice_sequence_info') }}?docType=" + encodeURIComponent(docType));
+            const data = await response.json();
+            console.log(`Backend /get_invoice_sequence_info response for ${docType}:`, data);
+
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+            }
+
+            sequenceInfo = data;
+
+            if (financialYearElement) {
+                financialYearElement.textContent = sequenceInfo.financialYear || 'N/A';
+            }
+
+            if (data.status === 'needs_setup') {
+                updateStatus(`Setup needed for ${docType} FY ${sequenceInfo.financialYear}. Print disabled.`);
+                updatePreviewDisplay(`Sequence not set up for ${docType}`, "N/A", sequenceInfo.financialYear);
+                if (printButton) {
+                    printButton.disabled = true;
+                    printButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Setup Required';
+                }
+                if (confirm(`Invoice numbering sequence not set up for ${docType} Financial Year ${sequenceInfo.financialYear}.\nDo you want to set it up now?`)) {
+                    await setupInvoiceSequence(docType);
+                } else {
+                    if (printButtonSpinner) printButtonSpinner.classList.add('d-none');
+                }
+            } else if (data.status === 'info') {
+                if (isRevisitOfLoggedDoc && previewDataForJS.invoiceNumber && previewDataForJS.currentDate) {
+                    updateStatus(`Displaying logged ${docType}: ${previewDataForJS.invoiceNumber}. Next for new doc: ${sequenceInfo.formatExample}`);
+                    updatePreviewDisplay(previewDataForJS.invoiceNumber, previewDataForJS.currentDate, sequenceInfo.financialYear);
+                    if (printButton) {
+                        printButton.disabled = false;
+                        printButton.innerHTML = '<i class="bi bi-printer"></i> Print & Log Again';
+                    }
+                    if (editInvoiceNumberIcon) editInvoiceNumberIcon.style.display = 'inline';
+                    if (editDateIcon) editDateIcon.style.display = 'inline';
+                    if (editInvoiceNumberInput) editInvoiceNumberInput.value = previewDataForJS.invoiceNumber;
+                    if (editDateInput) editDateInput.value = previewDataForJS.currentDate;
+                } else {
+                    let nextInvoiceNumber = sequenceInfo.formatExample;
+                    if (previewDataForJS.lastInvoiceNumber) {
+                        const parsed = parseInvoiceNumber(previewDataForJS.lastInvoiceNumber);
+                        if (parsed && parsed.financialYear === sequenceInfo.financialYear) {
+                            nextInvoiceNumber = formatInvoiceNumber(
+                                parsed.prefix,
+                                parsed.financialYear,
+                                parsed.code,
+                                parsed.numericPart + 1
+                            );
+                        }
+                    }
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    updatePreviewDisplay(nextInvoiceNumber, currentDate, sequenceInfo.financialYear);
+                    updateStatus(`Ready to Print & Log ${docType}. Next: ${nextInvoiceNumber}`);
+                    if (printButton) printButton.disabled = false;
+                    if (editInvoiceNumberIcon) editInvoiceNumberIcon.style.display = 'inline';
+                    if (editDateIcon) editDateIcon.style.display = 'inline';
+                    if (editInvoiceNumberInput) editInvoiceNumberInput.value = nextInvoiceNumber;
+                    if (editDateInput) editDateInput.value = currentDate;
+                    manualInvoiceNumberPart = null;
+                    manualDate = null;
+                }
+            } else {
+                throw new Error(data.message || `Unknown status from sequence info: ${data.status}`);
+            }
+        } catch (error) {
+            console.error(`Error fetching/processing sequence info for ${docType}:`, error);
+            updateStatus(`Sequence Error: ${error.message}`);
+            updatePreviewDisplay(`Error loading sequence for ${docType}`, "N/A", sequenceInfo?.financialYear || null);
+            if (printButton) printButton.disabled = true;
+        } finally {
+            if (printButtonSpinner) printButtonSpinner.classList.add('d-none');
+        }
+    }
+
+    async function printAndLogDocument() {
+        if (!previewDataForJS || Object.keys(previewDataForJS).length === 0) {
+            alert("Document data is missing. Cannot log or print.\nPlease return to the form and generate again.");
+            updateStatus('Missing document data.');
+            if (printButton) printButton.disabled = true;
+            return;
+        }
+
+        if (editInvoiceNumberInput && !editInvoiceNumberInput.classList.contains('d-none')) {
+            alert("Please save or cancel the edited invoice number before printing by clicking the icon or pressing Enter/Escape.");
+            editInvoiceNumberInput.focus();
+            return;
+        }
+
+        if (editDateInput && !editDateInput.classList.contains('d-none')) {
+            alert("Please save or cancel the edited date before printing by clicking the icon or pressing Enter/Escape.");
+            editDateInput.focus();
+            return;
+        }
+
+        updateStatus('Logging document...');
+        if (printButton) {
+            printButton.disabled = true;
+            printButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging...';
+        }
+        if (editInvoiceNumberIcon) editInvoiceNumberIcon.style.display = 'none';
+        if (editDateIcon) editDateIcon.style.display = 'none';
+
+        try {
+            const dataToSend = { ...previewDataForJS };
+            if (manualInvoiceNumberPart !== null) {
+                dataToSend.manualInvoiceNumberPart = manualInvoiceNumberPart;
+                console.log("Sending manualInvoiceNumberPart:", manualInvoiceNumberPart);
+            } else {
+                delete dataToSend.invoiceNumber;
+                console.log("No manual invoice number part, using sequential number");
+            }
+            if (manualDate) {
+                dataToSend.manualDate = manualDate;
+                console.log("Sending manualDate:", manualDate);
+            } else {
+                delete dataToSend.currentDate;
+            }
+
+            console.log("Data sent to backend:", JSON.stringify(dataToSend));
+
+            const response = await fetch("{{ url_for('log_document_to_excel') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSend)
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || `Failed to log document. Status: ${response.status}`);
+            }
+
+            console.log('Document logged. Backend response:', data);
+
+            previewDataForJS.invoiceNumber = data.invoiceNumber;
+            previewDataForJS.currentDate = data.currentDate;
+            previewDataForJS.lastInvoiceNumber = data.invoiceNumber;
+            previewDataForJS.financialYear = sequenceInfo?.financialYear || previewDataForJS.financialYear;
+
+            updatePreviewDisplay(data.invoiceNumber, data.currentDate, previewDataForJS.financialYear);
+            updateStatus(`Logged: ${data.invoiceNumber}. Printing...`);
+            manualInvoiceNumberPart = null;
+            manualDate = null;
+
+            window.print();
+            updateStatus(`Logged: ${data.invoiceNumber}. Print dialog shown. Navigating...`);
+            sessionStorage.removeItem('invoiceFormData');
+            window.location.href = data.redirect || '/';
+        } catch (error) {
+            console.error('Error in printAndLogDocument:', error);
+            updateStatus(`Error: ${error.message}`);
+            if (printButton) {
+                printButton.disabled = false;
+                printButton.innerHTML = '<i class="bi bi-printer"></i> Print & Log';
+            }
+            if (editInvoiceNumberIcon && editDateIcon && sequenceInfo?.status === 'info') {
+                editInvoiceNumberIcon.style.display = 'inline';
+                editDateIcon.style.display = 'inline';
+            }
+            alert(`Operation failed: ${error.message}`);
+        } finally {
+            if (printButtonSpinner) printButtonSpinner.classList.add('d-none');
+        }
+    }
+
+    // Invoice Number Editing
+    if (editInvoiceNumberIcon && invoiceNumberSpan && editInvoiceNumberInput) {
+        editInvoiceNumberIcon.addEventListener('click', function() {
+            console.log("Edit invoice number icon clicked");
+            const isEditing = !editInvoiceNumberInput.classList.contains('d-none');
+            if (!isEditing) {
+                console.log("Starting invoice number edit");
+                invoiceNumberSpan.classList.add('d-none');
+                editInvoiceNumberInput.classList.remove('d-none');
+                editInvoiceNumberInput.style.display = 'inline-block';
+                editInvoiceNumberInput.value = invoiceNumberSpan.textContent !== "Loading..." ? invoiceNumberSpan.textContent : (sequenceInfo?.formatExample || '');
+                editInvoiceNumberInput.focus();
+                updateStatus('Editing invoice number...');
+                editInvoiceNumberIcon.classList.remove('bi-pencil-fill');
+                editInvoiceNumberIcon.classList.add('bi-check-circle-fill', 'text-success');
+                editInvoiceNumberIcon.title = "Save edited number";
+            } else {
+                console.log("Saving invoice number edit");
+                saveEditedInvoiceNumber();
+            }
+        });
+
+        editInvoiceNumberInput.addEventListener('keypress', function(event) {
+            console.log("Keypress in invoice number input:", event.key);
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveEditedInvoiceNumber();
+            }
+        });
+
+        editInvoiceNumberInput.addEventListener('keydown', function(event) {
+            console.log("Keydown in invoice number input:", event.key);
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                cancelEditInvoiceNumber();
+            }
+        });
+
+        function saveEditedInvoiceNumber() {
+            const editedValue = editInvoiceNumberInput.value.trim();
+            console.log("Attempting to save invoice number:", editedValue);
+            if (!editedValue) {
+                console.warn("Empty invoice number input");
+                alert("Invoice number cannot be empty.");
+                editInvoiceNumberInput.focus();
+                return;
+            }
+            const parsed = parseInvoiceNumber(editedValue);
+            if (!parsed) {
+                console.warn("Invalid invoice number format:", editedValue);
+                alert("Invalid invoice number format. Please use the format: PREFIX/YYYY-YY/CODE/NUMBER (e.g., MGKBIN-BioNEST/2025-26/4661/0050)");
+                editInvoiceNumberInput.focus();
+                return;
+            }
+            manualInvoiceNumberPart = parsed.numericPart;
+            console.log("Manual invoice number part set to:", manualInvoiceNumberPart);
+            invoiceNumberSpan.textContent = editedValue;
+            updateStatus(`Manual number ${editedValue} saved. Will be used on next 'Print & Log'.`);
+            finishEditingInvoiceNumber();
+        }
+
+        function cancelEditInvoiceNumber() {
+            console.log("Cancelling invoice number edit");
+            let restoreNumber = "N/A";
+            if (previewDataForJS.invoiceNumber && previewDataForJS.invoiceNumber !== "Loading...") {
+                restoreNumber = previewDataForJS.invoiceNumber;
+            } else if (sequenceInfo?.formatExample) {
+                restoreNumber = sequenceInfo.formatExample;
+            } else if (previewDataForJS.lastInvoiceNumber) {
+                const parsed = parseInvoiceNumber(previewDataForJS.lastInvoiceNumber);
+                if (parsed && parsed.financialYear === sequenceInfo?.financialYear) {
+                    restoreNumber = formatInvoiceNumber(
+                        parsed.prefix,
+                        parsed.financialYear,
+                        parsed.code,
+                        parsed.numericPart + 1
+                    );
+                }
+            }
+            invoiceNumberSpan.textContent = restoreNumber;
+            updateStatus('Invoice number edit cancelled.');
+            manualInvoiceNumberPart = null;
+            finishEditingInvoiceNumber();
+        }
+
+        function finishEditingInvoiceNumber() {
+            console.log("Finishing invoice number edit");
+            invoiceNumberSpan.classList.remove('d-none');
+            editInvoiceNumberInput.classList.add('d-none');
+            editInvoiceNumberInput.style.display = 'none';
+            editInvoiceNumberIcon.classList.remove('bi-check-circle-fill', 'text-success');
+            editInvoiceNumberIcon.classList.add('bi-pencil-fill');
+            editInvoiceNumberIcon.title = "Edit invoice number";
+        }
+    } else {
+        console.warn("Invoice number edit elements not found. Invoice number editing disabled.");
+    }
+
+    // Date Editing
+    if (editDateIcon && dateSpanElement && editDateInput) {
+        editDateIcon.addEventListener('click', function() {
+            const isEditing = !editDateInput.classList.contains('d-none');
+            if (!isEditing) {
+                dateSpanElement.classList.add('d-none');
+                editDateInput.classList.remove('d-none');
+                editDateInput.style.display = 'inline-block';
+                editDateInput.value = dateSpanElement.textContent !== "Loading..." ? dateSpanElement.textContent : new Date().toISOString().split('T')[0];
+                editDateInput.focus();
+                updateStatus('Editing date...');
+                editDateIcon.classList.remove('bi-pencil-fill');
+                editDateIcon.classList.add('bi-check-circle-fill', 'text-success');
+                editDateIcon.title = "Save edited date";
+                editDateInput.addEventListener('keypress', handleDateKeyPress);
+                editDateInput.addEventListener('keydown', handleDateKeyDown);
+            } else {
+                saveEditedDate();
+            }
+        });
+
+        function handleDateKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveEditedDate();
+            }
+        }
+
+        function handleDateKeyDown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                cancelEditDate();
+            }
+        }
+
+        function saveEditedDate() {
+            const editedValue = editDateInput.value.trim();
+            if (!validateDate(editedValue)) {
+                alert("Invalid date format. Please use YYYY-MM-DD (e.g., 2025-05-10).");
+                editDateInput.focus();
+                return;
+            }
+            manualDate = editedValue;
+            console.log("Manual date set to:", manualDate);
+            dateSpanElement.textContent = editedValue;
+            finishEditingDate();
+            updateStatus(`Manual date ${editedValue} prepared. Will be used on next 'Print & Log'.`);
+        }
+
+        function cancelEditDate() {
+            let restoreDate = new Date().toISOString().split('T')[0];
+            if (previewDataForJS.currentDate && previewDataForJS.currentDate !== "Loading...") {
+                restoreDate = previewDataForJS.currentDate;
+            }
+            dateSpanElement.textContent = restoreDate;
+            finishEditingDate();
+            manualDate = null;
+            updateStatus('Date edit cancelled.');
+        }
+
+        function finishEditingDate() {
+            dateSpanElement.classList.remove('d-none');
+            editDateInput.classList.add('d-none');
+            editDateIcon.classList.remove('bi-check-circle-fill', 'text-success');
+            editDateIcon.classList.add('bi-pencil-fill');
+            editDateIcon.title = "Edit date";
+            editDateInput.removeEventListener('keypress', handleDateKeyPress);
+            editDateInput.removeEventListener('keydown', handleDateKeyDown);
+        }
+    } else {
+        console.warn("Date edit elements not found. Date editing disabled.");
+    }
+
+    window.onload = function() {
+        let isRevisitOfLoggedDoc = false;
+        if (previewDataForJS && Object.keys(previewDataForJS).length > 0) {
+            if (previewDataForJS.invoiceNumber && previewDataForJS.currentDate) {
+                console.log("onload: Found existing invoice number and date in session data:", previewDataForJS.invoiceNumber, previewDataForJS.currentDate);
+                updatePreviewDisplay(previewDataForJS.invoiceNumber, previewDataForJS.currentDate, previewDataForJS.financialYear);
+                isRevisitOfLoggedDoc = true;
+            } else {
+                console.log("onload: No existing invoice number or date in session data. Will fetch next predicted.");
+                updatePreviewDisplay("Loading...", "Loading...", null);
+            }
+            if (previewDataForJS.docType && previewDataForJS.docType.toUpperCase() === 'ICNB') {
+                cardHeaderTitle.textContent = 'Invoice Cum Bill of Supply';
+            } else if (previewDataForJS.docType && previewDataForJS.docType.toUpperCase() === 'QUOTE') {
+                cardHeaderTitle.textContent = 'Quotation';
+            } else if (previewDataForJS.docType) {
+                cardHeaderTitle.textContent = previewDataForJS.docType.toUpperCase();
+            } else {
+                cardHeaderTitle.textContent = 'Document';
+            }
+        } else {
+            console.log("onload: No preview_data in session.");
+            updatePreviewDisplay("No Data", "No Data", null);
+            updateStatus("No document data available.");
+            if (printButton) printButton.disabled = true;
+            return;
+        }
+        fetchSequenceInfo(isRevisitOfLoggedDoc);
+    };
+
+    if (typeof jQuery === 'undefined') {
+        console.error('jQuery is not loaded. Please ensure jQuery is included in base.html.');
+        alert('Error: jQuery is not loaded. Delete functionality is disabled.');
+    } else {
+        $(document).ready(function() {
+            $('#deleteBtn').on('click', function() {
+                if (confirm('Are you sure you want to delete this document? This will clear all form data.')) {
+                    $.ajax({
+                        url: '/delete_preview',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({}),
+                        success: function(response) {
+                            if (response.redirect) {
+                                sessionStorage.removeItem('invoiceFormData');
+                                window.location.href = response.redirect;
+                            } else {
+                                alert('Document deleted, but no redirect instruction received.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error deleting document:", status, error, xhr.responseText);
+                            alert(`Error deleting document: ${xhr.responseJSON ? (xhr.responseJSON.message || xhr.responseJSON.error || xhr.responseText) : error}`);
+                        }
+                    });
+                }
+            });
+        });
+    }
+</script>
+{% endblock %}
