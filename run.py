@@ -21,7 +21,7 @@ app = Flask(__name__)
 # --- App Configuration ---
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'a_very_insecure_default_secret_key_CHANGE_ME_NOW')
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///invoices.db')  # Use file-based SQLite for persistence
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://neondb_owner:npg_zG0sAqhX8OFP@ep-raspy-glitter-a4eqnhhs-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE1_URL', 'postgresql://neondb_owner:npg_zG0sAqhX8OFP@ep-raspy-glitter-a4eqnhhs-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 5,
